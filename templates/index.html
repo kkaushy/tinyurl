@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        var apiURL = window.location.href + 'api';
+
+        function generate() {
+            var urldata = $("#url").val()
+            data = {
+                'url': urldata
+            }
+            $.ajax({
+                type: "POST",
+                url: apiURL + "/tiny/",
+                data: data,
+                success: function(response) {
+                    $("#url").val("");
+                    getUrlList();
+                },
+            });
+        }
+
+        function deleteURL(url) {
+            $.ajax({
+                url: apiURL + "/tiny/" + url,
+                type: 'DELETE',
+                success: function(result) {
+                    getUrlList();
+                }
+            });
+        }
+
+        function getUrlList() {
+            var urldata = $("#url").val();
+            $.ajax({
+                type: "GET",
+                url: apiURL + "/tiny/" + urldata,
+                success: function(response) {
+                    $('#urlList').html("");
+                    var urlList = "<ul>";
+                    for (var i in response) {
+                        var fullURL = response[i].shortURL;
+                        urlList = urlList + "<li>";
+                        urlList = urlList + "<a target='_blank' href='redirect/" + fullURL + "'>" + response[i].actualUrl + "</a>";
+                        urlList = urlList + "<button onclick=deleteURL('" + fullURL + "')>Delete</button>";
+                    }
+                    urlList = urlList + "</ul>";
+                    $('#urlList').append(urlList);
+                },
+            });
+        }
+        $(document).ready(function() {
+            getUrlList();
+        });
+    </script>
+</head>
+
+<body>
+    <p>Enter your URL</p>
+    <input type="text" id='url' />
+    <button onclick="generate()">Generate tiny URL</button>
+    <button onclick="getUrlList()">Get tiny URL</button>
+    <div id='urlList'>
+    </div>
+</body>
+
+</html>
